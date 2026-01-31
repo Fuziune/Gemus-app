@@ -1,12 +1,13 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { HumanMessage } from "@langchain/core/messages";
 import { z } from "zod";
 
 // Initialize the model
 // Ensure you have GOOGLE_API_KEY in your .env file
 // We use "gemini-1.5-flash" for low latency and good vision capabilities.
 const model = new ChatGoogleGenerativeAI({
-    model: "gemini-1.5-flash",
-    temperature: 0, // Deterministic results are better for extraction
+    model: "gemini-3-flash-preview",
+    temperature: 0,
 });
 
 // 1. Define the Schema
@@ -65,15 +66,20 @@ export async function analyzeFaceWithGemini(imageBase64: string): Promise<FaceAn
         const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
         // 3. Invoke the model with text + image
+        // 3. Invoke the model with text + image
         const response = await structuredModel.invoke([
-            {
-                type: "text",
-                text: "Analyze this portrait perfectly. Ignore background details, focus only on the person's face and features to provide styling advice."
-            },
-            {
-                type: "image_url",
-                image_url: `data:image/jpeg;base64,${cleanBase64}`
-            }
+            new HumanMessage({
+                content: [
+                    {
+                        type: "text",
+                        text: "Analyze this portrait perfectly. Ignore background details, focus only on the person's face and features to provide styling advice."
+                    },
+                    {
+                        type: "image_url",
+                        image_url: `data:image/jpeg;base64,${cleanBase64}`
+                    }
+                ]
+            })
         ]);
 
         return response;
