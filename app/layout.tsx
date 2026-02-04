@@ -2,6 +2,7 @@ import React from "react"
 import type { Metadata } from 'next'
 import { Playfair_Display, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { CSPostHogProvider } from './providers'
 import './globals.css'
 
 const _playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-playfair' });
@@ -38,8 +39,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        {children}
-        <Analytics />
+        <CSPostHogProvider>
+          {children}
+          <Analytics />
+        </CSPostHogProvider>
       </body>
     </html>
   )

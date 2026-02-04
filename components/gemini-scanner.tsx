@@ -9,6 +9,7 @@ import { motion, useInView } from "framer-motion"
 import { Spinner } from "@/components/ui/spinner"
 import { analyzeImageAction } from "@/app/actions/analyze"
 import type { FaceAnalysisResult } from "@/lib/ai-analysis"
+import posthog from 'posthog-js'
 
 export function GeminiScanner() {
     const [mode, setMode] = useState<'idle' | 'camera' | 'upload' | 'analyzing' | 'complete'>('idle');
@@ -124,7 +125,7 @@ export function GeminiScanner() {
                                     <Button onClick={startCamera} className="uppercase tracking-wider text-xs h-12">
                                         <Camera className="mr-2 w-4 h-4" /> Open Camera
                                     </Button>
-                                    <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="uppercase tracking-wider text-xs h-12">
+                                    <Button onClick={() => { fileInputRef.current?.click(); posthog.capture('gemini_scanner_upload_photo') }} variant="outline" className="uppercase tracking-wider text-xs h-12">
                                         <Upload className="mr-2 w-4 h-4" /> Upload Photo
                                     </Button>
                                 </div>
