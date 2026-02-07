@@ -97,13 +97,6 @@ export function GeminiScanner() {
     return (
         <section ref={containerRef} className="relative py-32 overflow-hidden bg-background" id="ai-scanner">
             {/* Subtle Tech Background Grid */}
-            {/* Subtle Tech Background Grid - Increased Visibility */}
-            <div className="absolute inset-0 z-0 opacity-[0.05]"
-                style={{
-                    backgroundImage: 'linear-gradient(#000 1.5px, transparent 1.5px), linear-gradient(90deg, #000 1.5px, transparent 1.5px)',
-                    backgroundSize: '40px 40px'
-                }}
-            />
             {/* Vignette Overlay */}
             <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.03)_100%)] pointer-events-none" />
 
@@ -137,11 +130,7 @@ export function GeminiScanner() {
                         {/* Left: Input Area / Viewfinder */}
                         <div className="relative flex flex-col items-center justify-center p-8 min-h-[400px] border-b md:border-b-0 md:border-r border-black/5 bg-slate-50/50">
 
-                            {/* Decorative Tech Corners - Gold */}
-                            <div className="absolute top-8 left-8 w-6 h-6 border-t-[1.5px] border-l-[1.5px] border-accent opacity-60" />
-                            <div className="absolute top-8 right-8 w-6 h-6 border-t-[1.5px] border-r-[1.5px] border-accent opacity-60" />
-                            <div className="absolute bottom-8 left-8 w-6 h-6 border-b-[1.5px] border-l-[1.5px] border-accent opacity-60" />
-                            <div className="absolute bottom-8 right-8 w-6 h-6 border-b-[1.5px] border-r-[1.5px] border-accent opacity-60" />
+
 
                             <AnimatePresence mode="wait">
                                 {mode === 'idle' && (
