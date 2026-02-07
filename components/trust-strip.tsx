@@ -1,56 +1,45 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { Scan, ShieldCheck, BadgeCheck } from "lucide-react"
+import { ShieldCheck, Truck, RotateCcw, Clock } from "lucide-react"
 
-const trustIndicators = [
-  { icon: Scan, label: "AI Vision" },
-  { icon: ShieldCheck, label: "Private & Secure" },
-  { icon: BadgeCheck, label: "Verified Jewelers" },
+const benefits = [
+  {
+    icon: ShieldCheck,
+    text: "Certified 14K Gold",
+  },
+  {
+    icon: Truck,
+    text: "Free Shipping",
+  },
+  {
+    icon: RotateCcw,
+    text: "30-Day Returns",
+  },
+  {
+    icon: Clock,
+    text: "2-Year Warranty",
+  },
 ]
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.6,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
-  },
-}
 
 export function TrustStrip() {
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="flex items-center justify-center gap-12 md:gap-16 pt-12"
-    >
-      {trustIndicators.map((item) => (
-        <motion.div
-          key={item.label}
-          variants={itemVariants}
-          className="flex flex-col items-center gap-3 opacity-60 hover:opacity-100 transition-opacity duration-500"
-        >
-          <div className="w-10 h-10 border border-border bg-card flex items-center justify-center">
-            <item.icon className="w-4 h-4 text-foreground" strokeWidth={1.5} />
+    <div className="w-full border-t border-white/10 pt-8 mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {benefits.map((benefit, index) => (
+          <div
+            key={index}
+            className="flex flex-col items-center justify-center gap-2 text-center group"
+          >
+            <benefit.icon
+              className="w-5 h-5 text-white/60 group-hover:text-white transition-colors duration-300"
+              strokeWidth={1.5}
+            />
+            <span className="text-[10px] uppercase tracking-widest text-white/50 group-hover:text-white/80 transition-colors duration-300 font-medium">
+              {benefit.text}
+            </span>
           </div>
-          <span className="text-[10px] text-muted-foreground font-sans tracking-[0.15em] uppercase">
-            {item.label}
-          </span>
-        </motion.div>
-      ))}
-    </motion.div>
+        ))}
+      </div>
+    </div>
   )
 }

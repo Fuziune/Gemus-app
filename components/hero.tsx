@@ -2,78 +2,113 @@
 
 import { Button } from "@/components/ui/button"
 import { TrustStrip } from "@/components/trust-strip"
-import { HeroCarousel } from "@/components/hero-carousel"
-import { motion } from "framer-motion"
-import { ArrowRight } from "lucide-react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { ArrowRight, Sparkles } from "lucide-react"
+import Image from "next/image"
+import { useRef } from "react"
 
 export function Hero() {
-  return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-32 text-center overflow-hidden">
-      <div className="relative z-10 max-w-4xl mx-auto space-y-10">
-        {/* Brand pill */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-3 px-4 py-2 border border-border bg-card"
-        >
-          <div className="w-1.5 h-1.5 bg-accent" />
-          <span className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground font-sans font-medium">Gemus AI</span>
-        </motion.div>
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  })
 
-        {/* Headline */}
-        <motion.h1
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"])
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
+
+  return (
+    <section ref={ref} className="relative h-screen w-full overflow-hidden flex items-center justify-center text-center">
+      {/* Background Image with Parallax & Ken Burns Effect */}
+      <motion.div
+        style={{ y, scale, opacity }}
+        className="absolute inset-0 z-0"
+      >
+        <Image
+          src="/images/hero-cinematic.png"
+          alt="Luxury Jewelry Background"
+          fill
+          priority
+          className="object-cover"
+          quality={100}
+        />
+        <div className="absolute inset-0 bg-black/40" /> {/* Cinematic Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/20" />
+      </motion.div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 space-y-8 flex flex-col items-center">
+
+        {/* Brand Badge */}
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tight text-foreground leading-[1.05] text-balance"
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md"
         >
-          The Science of Style.
+          <Sparkles className="w-3 h-3 text-accent" />
+          <span className="text-[11px] tracking-[0.2em] uppercase text-white/90 font-medium font-sans">
+            Gemus AI · Premium Selection
+          </span>
+        </motion.div>
+
+        {/* Main Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="font-serif text-6xl md:text-8xl lg:text-9xl tracking-tight text-white leading-[0.9] drop-shadow-2xl"
+        >
+          The Science <br />
+          <span className="italic font-light text-white/90">of Elegance.</span>
         </motion.h1>
 
         {/* Subheadline */}
         <motion.p
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="font-sans text-base md:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed text-pretty"
+          transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="font-sans text-lg md:text-xl text-white/80 max-w-xl mx-auto leading-relaxed font-light mt-4 mix-blend-plus-lighter"
         >
-          Gemus AI analyzes 50+ facial landmarks to find the perfect jewelry gift.
+          Analyze your unique facial features to discover jewelry <br className="hidden md:block" />
+          curated specifically for your aura.
         </motion.p>
 
-        {/* CTA Button */}
+        {/* CTA Actions */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 1, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="pt-4"
+          transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col sm:flex-row gap-4 pt-6"
         >
           <Button
             size="lg"
-            className="group rounded-none h-12 px-8 text-sm font-medium tracking-wide uppercase bg-primary text-primary-foreground hover:bg-foreground/90 transition-all duration-300"
+            className="group h-14 px-10 rounded-full text-sm font-semibold tracking-wide uppercase bg-white text-black hover:bg-white/90 transition-all duration-300 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]"
           >
             Start Analysis
             <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Button>
+
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-14 px-10 rounded-full text-sm font-semibold tracking-wide uppercase border-white/15 text-black hover:bg-white/10 hover:border-white transition-all duration-300 backdrop-blur-sm"
+          >
+            Explore Methodology
+          </Button>
         </motion.div>
-
-        {/* Trust indicator */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-xs text-muted-foreground/70 pt-2 font-sans tracking-wide"
-        >
-          No account required · Results in 30 seconds
-        </motion.p>
-
-        {/* Trust Strip */}
-        <TrustStrip />
       </div>
 
-      <div className="w-full mt-16 sm:mt-24 px-4">
-        <HeroCarousel />
-      </div>
+      {/* Trust Strip Overlay */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5, delay: 0.8 }}
+        className="absolute bottom-10 left-0 right-0 z-10 opacity-70 scale-90"
+      >
+        {/* <TrustStrip /> */}
+      </motion.div>
     </section>
   )
 }

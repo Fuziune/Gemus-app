@@ -2,14 +2,15 @@
 
 import { useState, useRef, ChangeEvent } from "react"
 import { Card } from "@/components/ui/card"
-import { Camera, Upload, Check, AlertCircle, X, ImageIcon, Sparkles } from "lucide-react"
+import { Camera, Upload, Check, AlertCircle, X, ImageIcon, Sparkles, ScanFace } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { motion, useInView } from "framer-motion"
+import { motion, useInView, AnimatePresence } from "framer-motion"
 import { Spinner } from "@/components/ui/spinner"
 import { analyzeImageAction } from "@/app/actions/analyze"
 import type { FaceAnalysisResult } from "@/lib/ai-analysis"
 import posthog from 'posthog-js'
+import Image from "next/image"
 
 export function GeminiScanner() {
     const [mode, setMode] = useState<'idle' | 'camera' | 'upload' | 'analyzing' | 'complete'>('idle');
@@ -94,137 +95,189 @@ export function GeminiScanner() {
     };
 
     return (
-        <section ref={containerRef} className="px-6 py-32 bg-secondary/30" id="ai-scanner">
-            <div className="max-w-6xl mx-auto">
+        <section ref={containerRef} className="relative py-32 overflow-hidden" id="ai-scanner">
+            {/* Dark Tech Background */}
+            <div className="absolute inset-0 z-0">
+                <Image
+                    src="/images/scanner-bg.png"
+                    alt="AI Technology Background"
+                    fill
+                    className="object-cover opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-background via-black/80 to-background" />
+            </div>
+
+            <div className="relative z-10 max-w-6xl mx-auto px-6">
                 <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
 
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                    className="text-center mb-12"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-16 space-y-4"
                 >
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        <Sparkles className="w-4 h-4 text-accent" />
-                        <span className="text-[10px] tracking-[0.3em] uppercase text-accent font-sans font-medium">Powered by Gemini AI</span>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent/10 border border-accent/20 rounded-full backdrop-blur-md">
+                        <Sparkles className="w-3 h-3 text-accent" />
+                        <span className="text-[10px] tracking-[0.3em] uppercase text-accent font-semibold">Gemus AI Engine</span>
                     </div>
-                    <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-4">Smart Feature Recognition</h2>
-                    <p className="text-muted-foreground max-w-xl mx-auto">
+                    <h2 className="font-serif text-5xl md:text-6xl text-white drop-shadow-xl">
+                        Smart Feature Recognition
+                    </h2>
+                    <p className="text-white/60 max-w-xl mx-auto text-lg font-light leading-relaxed">
                         Upload a photo to instantly analyze face shape, skin tone, and receive personalized jewelry recommendations.
                     </p>
                 </motion.div>
 
-                <Card className="grid md:grid-cols-2 gap-0 overflow-hidden border-border bg-card shadow-2xl min-h-[500px]">
-                    {/* Left: Input Area */}
-                    <div className="relative bg-black/5 flex flex-col items-center justify-center p-6 min-h-[400px]">
-                        {mode === 'idle' && (
-                            <div className="text-center space-y-6">
-                                <div className="w-20 h-20 border border-dashed border-foreground/30 rounded-full flex items-center justify-center mx-auto">
-                                    <ImageIcon className="w-8 h-8 text-foreground/50" />
-                                </div>
-                                <div className="flex flex-col gap-3 w-64">
-                                    <Button onClick={startCamera} className="uppercase tracking-wider text-xs h-12">
-                                        <Camera className="mr-2 w-4 h-4" /> Open Camera
-                                    </Button>
-                                    <Button onClick={() => { fileInputRef.current?.click(); posthog.capture('gemini_scanner_upload_photo') }} variant="outline" className="uppercase tracking-wider text-xs h-12">
-                                        <Upload className="mr-2 w-4 h-4" /> Upload Photo
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                >
+                    <Card className="grid md:grid-cols-2 gap-0 overflow-hidden border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl min-h-[600px] ring-1 ring-white/10">
+                        {/* Left: Input Area / Viewfinder */}
+                        <div className="relative flex flex-col items-center justify-center p-8 min-h-[400px] border-b md:border-b-0 md:border-r border-white/10 bg-black/20">
 
-                        {mode === 'camera' && (
-                            <div className="relative w-full h-full flex flex-col items-center">
-                                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover rounded-md" />
-                                <Button onClick={capturePhoto} className="absolute bottom-8 left-1/2 -translate-x-1/2 rounded-full px-8 shadow-xl bg-white text-black hover:bg-white/90">
-                                    Take Photo
-                                </Button>
-                            </div>
-                        )}
+                            {/* Decorative Viewfinder Corners */}
+                            <div className="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-accent/50 rounded-tl-lg" />
+                            <div className="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-accent/50 rounded-tr-lg" />
+                            <div className="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-accent/50 rounded-bl-lg" />
+                            <div className="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-accent/50 rounded-br-lg" />
 
-                        {(mode === 'analyzing' || mode === 'complete') && imageSrc && (
-                            <div className="relative w-full h-full">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={imageSrc} alt="Analyzed" className="w-full h-full object-cover" />
-                                {mode === 'analyzing' && (
-                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
-                                        <div className="text-center text-white space-y-3">
-                                            <Spinner className="w-8 h-8 mx-auto" />
-                                            <p className="text-xs uppercase tracking-widest animate-pulse">Processing with AI...</p>
+                            <AnimatePresence mode="wait">
+                                {mode === 'idle' && (
+                                    <motion.div
+                                        key="idle"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="text-center space-y-8 relative z-10"
+                                    >
+                                        <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto shadow-[0_0_30px_-5px_rgba(255,255,255,0.1)]">
+                                            <ScanFace className="w-10 h-10 text-white/80" strokeWidth={1} />
+                                        </div>
+                                        <div className="flex flex-col gap-4 w-72">
+                                            <Button onClick={startCamera} className="uppercase tracking-widest text-xs h-14 bg-white text-black hover:bg-white/90 rounded-full font-bold">
+                                                <Camera className="mr-2 w-4 h-4" /> Open Camera
+                                            </Button>
+                                            <Button onClick={() => { fileInputRef.current?.click(); posthog.capture('gemini_scanner_upload_photo') }} variant="outline" className="uppercase tracking-widest text-xs h-14 border-white/20 text-white hover:bg-white/10 rounded-full font-bold backdrop-blur-sm">
+                                                <Upload className="mr-2 w-4 h-4" /> Upload Photo
+                                            </Button>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {mode === 'camera' && (
+                                    <motion.div key="camera" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full flex flex-col items-center justify-center">
+                                        <div className="relative w-full aspect-[3/4] md:aspect-auto md:h-full max-h-[500px] overflow-hidden rounded-lg border border-white/20">
+                                            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                        </div>
+                                        <Button onClick={capturePhoto} className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-full px-10 py-6 shadow-2xl bg-white text-black hover:bg-white/90 text-xs font-bold uppercase tracking-widest">
+                                            Take Photo
+                                        </Button>
+                                    </motion.div>
+                                )}
+
+                                {(mode === 'analyzing' || mode === 'complete') && imageSrc && (
+                                    <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full flex items-center justify-center">
+                                        <div className="relative w-full aspect-[3/4] md:aspect-auto md:h-full max-h-[500px] overflow-hidden rounded-lg border border-white/20">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={imageSrc} alt="Analyzed" className="w-full h-full object-cover" />
+                                            {mode === 'analyzing' && (
+                                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                                                    <div className="text-center text-white space-y-4">
+                                                        <Spinner className="w-10 h-10 mx-auto text-accent" />
+                                                        <p className="text-sm uppercase tracking-widest animate-pulse font-medium text-accent">Analyzing Features...</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {errorMessage && (
+                                <div className="absolute top-10 left-10 right-10 bg-red-500/20 border border-red-500/30 p-4 text-red-200 text-sm text-center rounded-lg backdrop-blur-md">
+                                    {errorMessage}
+                                    <Button variant="link" size="sm" onClick={reset} className="ml-2 h-auto p-0 text-white underline">Retry</Button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right: Results Area */}
+                        <div className="p-8 md:p-12 flex flex-col bg-white/5 relative">
+                            {/* Background Texture for Result Side */}
+                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-soft-light pointer-events-none"></div>
+
+                            <h3 className="font-serif text-3xl mb-8 text-white relative z-10 border-b border-white/10 pb-6 flex items-center justify-between">
+                                Analysis Report
+                                {result && <Check className="w-6 h-6 text-green-400" />}
+                            </h3>
+
+                            <div className="relative z-10 flex-1">
+                                {mode === 'idle' || mode === 'camera' ? (
+                                    <div className="h-full flex flex-col items-center justify-center text-white/30 space-y-4">
+                                        <Sparkles className="w-12 h-12 opacity-50" />
+                                        <p className="text-sm uppercase tracking-widest font-light">Waiting for capture...</p>
+                                    </div>
+                                ) : mode === 'analyzing' ? (
+                                    <div className="space-y-6 animate-pulse opacity-50 mt-8">
+                                        <div className="h-6 bg-white/10 rounded w-3/4"></div>
+                                        <div className="h-4 bg-white/5 rounded w-full"></div>
+                                        <div className="h-4 bg-white/5 rounded w-5/6"></div>
+                                        <div className="grid grid-cols-2 gap-4 mt-8">
+                                            <div className="h-24 bg-white/5 rounded"></div>
+                                            <div className="h-24 bg-white/5 rounded"></div>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        )}
-                        {errorMessage && (
-                            <div className="absolute top-4 left-4 right-4 bg-red-500/10 border border-red-500/20 p-3 text-red-500 text-xs text-center rounded">
-                                {errorMessage}
-                                <Button variant="link" size="sm" onClick={reset} className="ml-2 h-auto p-0 text-red-500 underline">Retry</Button>
-                            </div>
-                        )}
-                    </div>
+                                ) : result ? (
+                                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                        <div className="grid grid-cols-2 gap-4 pb-4">
+                                            <div className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-accent/40 transition-colors">
+                                                <span className="text-[10px] uppercase text-white/50 block mb-2 tracking-wider">Face Shape</span>
+                                                <span className="font-serif text-xl text-accent">{result.faceShape}</span>
+                                            </div>
+                                            <div className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-accent/40 transition-colors">
+                                                <span className="text-[10px] uppercase text-white/50 block mb-2 tracking-wider">Skin Tone</span>
+                                                <span className="font-serif text-xl text-white">{result.skinTone}</span>
+                                            </div>
+                                        </div>
 
-                    {/* Right: Results Area */}
-                    <div className="p-8 bg-card flex flex-col">
-                        <h3 className="font-serif text-2xl mb-8 border-b pb-4">Analysis Report</h3>
+                                        <div className="space-y-3">
+                                            <h4 className="font-serif text-lg text-white/90">Stylist Notes</h4>
+                                            <p className="text-sm text-white/70 italic leading-relaxed border-l-2 border-accent/50 pl-4 py-1">
+                                                "{result.stylingAdvice.reasoning}"
+                                            </p>
+                                        </div>
 
-                        {mode === 'idle' || mode === 'camera' ? (
-                            <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm italic">
-                                Waiting for input...
-                            </div>
-                        ) : mode === 'analyzing' ? (
-                            <div className="space-y-4 animate-pulse opacity-50">
-                                <div className="h-4 bg-secondary rounded w-3/4"></div>
-                                <div className="h-4 bg-secondary rounded w-1/2"></div>
-                                <div className="h-32 bg-secondary rounded w-full mt-8"></div>
-                            </div>
-                        ) : result ? (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-3 bg-secondary/20 rounded">
-                                        <span className="text-[10px] uppercase text-muted-foreground block mb-1">Face Shape</span>
-                                        <span className="font-medium text-lg text-accent">{result.faceShape}</span>
+                                        <div>
+                                            <h4 className="font-serif text-lg mb-4 text-accent">Curated Recommendations</h4>
+                                            <ul className="space-y-3">
+                                                {result.stylingAdvice.jewelryRecommendations.map((rec, i) => (
+                                                    <motion.li
+                                                        initial={{ opacity: 0, x: 20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: 0.1 * i }}
+                                                        key={i}
+                                                        className="flex items-start text-sm text-white/80"
+                                                    >
+                                                        <span className="mr-3 text-accent mt-1 text-[10px]">●</span>
+                                                        {rec}
+                                                    </motion.li>
+                                                ))}
+                                            </ul>
+                                        </div>
+
+                                        <div className="pt-6 mt-auto">
+                                            <Button onClick={reset} variant="outline" className="w-full text-white border-white/20 hover:bg-white/10 hover:text-white uppercase tracking-widest text-xs h-12">
+                                                Analyze New Photo
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="p-3 bg-secondary/20 rounded">
-                                        <span className="text-[10px] uppercase text-muted-foreground block mb-1">Skin Tone</span>
-                                        <span className="font-medium text-sm">{result.skinTone}</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <span className="text-[10px] uppercase text-muted-foreground block mb-2">Features Identified</span>
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="text-xs border px-2 py-1 rounded-full">{result.genderPresentation}</span>
-                                        <span className="text-xs border px-2 py-1 rounded-full">{result.estimatedAgeRange} years</span>
-                                        {result.facialFeatures.distinctiveFeatures.map((f, i) => (
-                                            <span key={i} className="text-xs border px-2 py-1 rounded-full bg-secondary/10">{f}</span>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h4 className="font-serif text-lg mb-2 mt-4 text-accent">Stylist Recommendations</h4>
-                                    <ul className="space-y-2 mb-4">
-                                        {result.stylingAdvice.jewelryRecommendations.map((rec, i) => (
-                                            <li key={i} className="flex items-start text-sm">
-                                                <Check className="w-4 h-4 mr-2 text-accent shrink-0 mt-0.5" />
-                                                {rec}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <p className="text-xs text-muted-foreground italic pl-6 border-l-2 border-accent/30">
-                                        "{result.stylingAdvice.reasoning}"
-                                    </p>
-                                </div>
-
-                                <div className="pt-4 mt-auto">
-                                    <Button onClick={reset} variant="outline" className="w-full">
-                                        Scan Another
-                                    </Button>
-                                </div>
+                                ) : null}
                             </div>
-                        ) : null}
-                    </div>
-                </Card>
+                        </div>
+                    </Card>
+                </motion.div>
             </div>
         </section>
     )
