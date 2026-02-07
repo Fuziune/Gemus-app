@@ -33,7 +33,7 @@ export function HowItWorks() {
       <div className="absolute inset-0 z-0">
         <video
           className="w-full h-full object-cover"
-          src="/videos/Jewellry_video_1.mp4"
+          src="/videos/Jewelry_Video_With_White_Background.mp4"
           autoPlay
           loop
           muted
