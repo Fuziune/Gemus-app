@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
-import { login, signup } from './actions'
+import { login, signup, signInWithMagicLink } from './actions'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,11 +18,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
-type View = 'signin' | 'signup'
+type View = 'signin' | 'signup' | 'magic-link'
 
 export function LoginForms() {
   const router = useRouter()
   const [view, setView] = useState<View>('signin')
+  const searchParams = useSearchParams()
 
   return (
     <Dialog
@@ -44,12 +46,18 @@ export function LoginForms() {
             Gemus
           </p>
           <DialogTitle className="font-serif text-2xl font-normal tracking-wide text-foreground md:text-3xl">
-            {view === 'signin' ? 'Welcome back' : 'Create your account'}
+            {view === 'signin'
+              ? 'Welcome back'
+              : view === 'magic-link'
+                ? 'Magic Link Login'
+                : 'Create your account'}
           </DialogTitle>
           <DialogDescription className="text-[11px] font-sans uppercase tracking-[0.18em] text-muted-foreground">
             {view === 'signin'
               ? 'Sign in to save finds and manage your profile'
-              : 'Join to unlock personalized jewelry recommendations'}
+              : view === 'magic-link'
+                ? 'Enter your email to receive a secure sign-in link'
+                : 'Join to unlock personalized jewelry recommendations'}
           </DialogDescription>
         </DialogHeader>
 
@@ -90,6 +98,11 @@ export function LoginForms() {
                 className="h-11 rounded-none border-border bg-background"
               />
             </div>
+            {searchParams.get('error') ? <p className=" text-xs tracking-[0.25em] text-[#ff3333] ">
+            {searchParams.get('error') === 'passwordOrEmail' ? 'Wrong password or email' : 'Magic link expired or invalid'}
+          </p>
+             : <></> }
+            
             <Button
               type="submit"
               formAction={login}
@@ -97,14 +110,69 @@ export function LoginForms() {
             >
               Sign in
             </Button>
+            <div className="flex flex-col gap-2">
+              <p className="text-center text-[11px] text-muted-foreground">
+                Don&apos;t have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => setView('signup')}
+                  className="font-medium text-foreground underline decoration-accent/60 underline-offset-4 transition-colors hover:text-accent"
+                >
+                  Sign up
+                </button>
+              </p>
+              <p className="text-center text-[11px] text-muted-foreground">
+                Or{' '}
+                <button
+                  type="button"
+                  onClick={() => setView('magic-link')}
+                  className="font-medium text-foreground underline decoration-accent/60 underline-offset-4 transition-colors hover:text-accent"
+                >
+                  login with magic link instead
+                </button>
+              </p>
+            </div>
+          </form>
+        ) : view === 'magic-link' ? (
+          <form className="flex flex-col gap-5">
+            <div className="space-y-2">
+              <Label
+                htmlFor="magic-email"
+                className="text-[10px] font-sans uppercase tracking-[0.2em] text-muted-foreground"
+              >
+                Email
+              </Label>
+              <Input
+                id="magic-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="you@example.com"
+                className="h-11 rounded-none border-border bg-background"
+              />
+            </div>
+            {searchParams.get('error') && searchParams.get('error') !== 'passwordOrEmail' ? (
+              <p className=" text-xs tracking-[0.25em] text-[#ff3333] ">
+                Magic link expired or invalid
+              </p>
+            ) : <></> }
+            
+            <Button
+              type="submit"
+              formAction={signInWithMagicLink}
+              className="mt-2 h-11 rounded-full font-sans text-[10px] font-medium uppercase tracking-[0.2em]"
+            >
+              Send Magic Link
+            </Button>
             <p className="text-center text-[11px] text-muted-foreground">
-              Don&apos;t have an account?{' '}
+              Return to{' '}
               <button
                 type="button"
-                onClick={() => setView('signup')}
+                onClick={() => setView('signin')}
                 className="font-medium text-foreground underline decoration-accent/60 underline-offset-4 transition-colors hover:text-accent"
               >
-                Sign up
+                password login
               </button>
             </p>
           </form>
