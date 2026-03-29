@@ -4,6 +4,7 @@ import { Playfair_Display, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { CSPostHogProvider } from './providers'
 import './globals.css'
+import { NextAuthSessionProvider } from './session-provider'
 
 const _playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-playfair' });
 const _inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
@@ -39,10 +40,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
+        <NextAuthSessionProvider>
         <CSPostHogProvider>
           {children}
           <Analytics />
         </CSPostHogProvider>
+        </NextAuthSessionProvider>
       </body>
     </html>
   )

@@ -2,15 +2,20 @@
 
 import { Hero } from "@/components/hero"
 import { HowItWorks } from "@/components/how-it-works"
-import { ScannerInterface } from "@/components/scanner-interface"
 import { GeminiScanner } from "@/components/gemini-scanner"
 import { ProductResults } from "@/components/product-results"
 import { UnboxingPromise } from "@/components/unboxing-promise"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import type { User } from "@supabase/supabase-js"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/client"
 
 export default function GemusLandingPage() {
+  const router = useRouter()
   const [isScrolled, setIsScrolled] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +23,19 @@ export default function GemusLandingPage() {
     }
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  useEffect(() => {
+    const supabase = createClient()
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   return (
@@ -51,20 +69,66 @@ export default function GemusLandingPage() {
             )}>
               Collection
             </a>
-            <button className={cn(
-              "text-[10px] font-medium font-sans uppercase tracking-[0.2em] transition-colors duration-300 px-4 py-2 border rounded-full",
-              isScrolled
-                ? "text-foreground border-foreground/20 hover:bg-foreground hover:text-background"
-                : "text-white border-white/30 hover:bg-white hover:text-black"
-            )}>
-              Login
-            </button>
+            {user ? (
+              <>
+                <Link
+                  href="/account"
+                  className={cn(
+                    "text-[10px] font-medium font-sans uppercase tracking-[0.2em] transition-colors duration-300 hidden sm:inline",
+                    isScrolled
+                      ? "text-muted-foreground hover:text-foreground"
+                      : "text-white/70 hover:text-white"
+                  )}
+                >
+                  Account
+                </Link>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const supabase = createClient()
+                    await supabase.auth.signOut()
+                    router.refresh()
+                  }}
+                  className={cn(
+                    "text-[10px] font-medium font-sans uppercase tracking-[0.2em] transition-colors duration-300 px-4 py-2 border rounded-full",
+                    isScrolled
+                      ? "text-foreground border-foreground/20 hover:bg-foreground hover:text-background"
+                      : "text-white border-white/30 hover:bg-white hover:text-black"
+                  )}
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className={cn(
+                  "text-[10px] font-medium font-sans uppercase tracking-[0.2em] transition-colors duration-300 px-4 py-2 border rounded-full",
+                  isScrolled
+                    ? "text-foreground border-foreground/20 hover:bg-foreground hover:text-background"
+                    : "text-white border-white/30 hover:bg-white hover:text-black"
+                )}
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
       <Hero />
+
+      <div className="relative w-full h-[500px] md:h-screen overflow-hidden">
+        <iframe
+          src="https://my.spline.design/your-scene-url-here"
+          className="w-full h-full border-0"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        />
+      </div>
+
+
 
       {/* How It Works */}
       <div id="how-it-works">
